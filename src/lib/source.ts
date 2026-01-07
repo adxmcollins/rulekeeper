@@ -9,6 +9,9 @@ export interface AvailableRule {
   path: string
 }
 
+// Files to ignore when listing available rules (case-insensitive)
+const IGNORED_FILES = ['readme.md']
+
 export async function getAvailableRules(config: GlobalConfig): Promise<AvailableRule[]> {
   const sourcePath = config.source.path
 
@@ -17,8 +20,9 @@ export async function getAvailableRules(config: GlobalConfig): Promise<Available
   }
 
   const files = await listFiles(sourcePath, '.md')
+  const filteredFiles = files.filter(file => !IGNORED_FILES.includes(file.toLowerCase()))
 
-  return files.map(file => ({
+  return filteredFiles.map(file => ({
     name: getRuleName(file),
     file,
     path: join(sourcePath, file)
