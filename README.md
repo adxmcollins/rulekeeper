@@ -2,6 +2,8 @@
 
 A cross-platform CLI tool for syncing and managing [Claude Code](https://docs.anthropic.com/en/docs/claude-code) rules across multiple projects.
 
+> **Note:** Claude Code has [built-in memory features](https://code.claude.com/docs/en/memory) that may meet your needs. RuleKeeper is a community tool for specific use cases like multi-project syncing and divergence tracking that aren't covered by the official solutions.
+
 ## Overview
 
 RuleKeeper helps teams maintain consistent Claude Code configurations by:
@@ -447,7 +449,9 @@ rk source pull
 
 ## When to Use RuleKeeper
 
-RuleKeeper complements Claude Code's native memory features. Use it when:
+First, check Claude Code's [official memory features](https://code.claude.com/docs/en/memory) — they may be all you need.
+
+RuleKeeper fills gaps not covered by official solutions:
 
 - **Multiple projects, same rules** — Manage once, distribute everywhere
 - **Multiple machines** — Source of truth in a git repo syncs across machines
