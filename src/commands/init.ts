@@ -7,7 +7,9 @@ import {
   expandTilde,
   fileExists,
   ensureDir,
-  cloneRepo
+  cloneRepo,
+  isGitRepo,
+  getRemoteUrl
 } from '../lib/index.js'
 import {
   intro,
@@ -48,6 +50,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   let sourcePath: string
   let remote: string | undefined
+  let detectedSourceType: SourceType = sourceType as SourceType
 
   if (sourceType === 'git') {
     // Get git URL
@@ -97,6 +100,16 @@ export async function init(options: InitOptions = {}): Promise<void> {
     }
 
     sourcePath = expandedPath
+
+    // Auto-detect if it's a git repo with a remote
+    if (isGitRepo(expandedPath)) {
+      const detectedRemote = await getRemoteUrl(expandedPath)
+      if (detectedRemote) {
+        detectedSourceType = 'git'
+        remote = detectedRemote
+        log.info(`Detected git repository with remote: ${detectedRemote}`)
+      }
+    }
   }
 
   // Select pull frequency
@@ -125,7 +138,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   // Create and save config
   const config = createConfig({
-    sourceType: sourceType as SourceType,
+    sourceType: detectedSourceType,
     sourcePath,
     remote,
     autoPull: true,
