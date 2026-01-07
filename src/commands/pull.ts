@@ -10,7 +10,8 @@ import {
   pullSourceIfNeeded,
   updateConfigLastPull,
   getRuleFilename,
-  deleteFile
+  deleteFile,
+  findRuleMatch
 } from '../lib/index.js'
 import {
   log,
@@ -57,10 +58,23 @@ export async function pull(rules: string[], options: PullOptions = {}): Promise<
     log.warn(messages.statusOffline)
   }
 
-  // Determine which rules to process
-  const rulesToProcess = rules.length > 0
-    ? rules
-    : Object.keys(manifest.rules)
+  // Determine which rules to process (case-insensitive matching)
+  const manifestRules = Object.keys(manifest.rules)
+  let rulesToProcess: string[]
+
+  if (rules.length > 0) {
+    rulesToProcess = []
+    for (const rule of rules) {
+      const match = findRuleMatch(rule, manifestRules)
+      if (match) {
+        rulesToProcess.push(match)
+      } else {
+        log.warn(`Rule '${rule}' not found in manifest`)
+      }
+    }
+  } else {
+    rulesToProcess = manifestRules
+  }
 
   const results = {
     updated: [] as string[],

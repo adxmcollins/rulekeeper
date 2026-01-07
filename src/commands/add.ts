@@ -14,14 +14,16 @@ import {
   hashFile,
   pullSourceIfNeeded,
   updateConfigLastPull,
-  getRuleFilename
+  getRuleFilename,
+  findRuleMatch
 } from '../lib/index.js'
 import {
   log,
   spinner,
   isCancel,
   confirmOverwrite,
-  selectRulesToAdd
+  selectRulesToAdd,
+  handleDivergedRule
 } from '../ui/index.js'
 import { messages } from '../ui/messages.js'
 
@@ -84,11 +86,16 @@ export async function add(rules: string[], options: AddOptions = {}): Promise<vo
     return
   }
 
-  // Validate all rules exist in source
+  // Resolve rules case-insensitively and validate they exist
+  const availableRuleNames = availableRules.map(r => r.name)
+  const resolvedRules: string[] = []
   const invalidRules: string[] = []
+
   for (const rule of rulesToAdd) {
-    const sourcePath = await getRuleSourcePath(rule, config)
-    if (!sourcePath) {
+    const match = findRuleMatch(rule, availableRuleNames)
+    if (match) {
+      resolvedRules.push(match)
+    } else {
       invalidRules.push(rule)
     }
   }
@@ -100,40 +107,66 @@ export async function add(rules: string[], options: AddOptions = {}): Promise<vo
     process.exit(1)
   }
 
-  // Check for existing files that would be overwritten
   const claudeDir = getClaudeDir()
-  const conflicts: string[] = []
-
-  for (const rule of rulesToAdd) {
-    const filename = getRuleFilename(rule)
-    const targetPath = join(claudeDir, filename)
-    if (fileExists(targetPath) && !installedRules.includes(rule)) {
-      conflicts.push(filename)
-    }
-  }
-
-  if (conflicts.length > 0) {
-    log.warn(messages.addConflict(conflicts))
-    const confirmed = await confirmOverwrite(conflicts)
-    if (!confirmed) {
-      log.info('Cancelled.')
-      return
-    }
-  }
-
-  // Ensure .claude directory exists
   ensureDir(claudeDir)
 
-  // Copy rules and update manifest
+  // Copy rules and update manifest, handling conflicts
   const updatedManifest = await getOrCreateManifest()
   let addedCount = 0
+  let skippedCount = 0
 
-  for (const rule of rulesToAdd) {
+  for (const rule of resolvedRules) {
     const sourcePath = await getRuleSourcePath(rule, config)
     if (!sourcePath) continue
 
     const filename = getRuleFilename(rule)
     const targetPath = join(claudeDir, filename)
+    const sourceHash = await hashFile(sourcePath)
+
+    // Check if file already exists with local changes
+    if (fileExists(targetPath)) {
+      const localHash = await hashFile(targetPath)
+      const entry = updatedManifest.rules[rule]
+
+      // If already tracked and unchanged, just update
+      if (entry && localHash === entry.localHash) {
+        await copyFile(sourcePath, targetPath)
+        const newHash = await hashFile(targetPath)
+        updatedManifest.rules[rule] = createRuleEntry({
+          file: filename,
+          sourceHash: newHash,
+          localHash: newHash
+        })
+        log.success(`Updated ${filename}`)
+        addedCount++
+        continue
+      }
+
+      // If file has local changes (tracked or untracked), ask user
+      if (!entry || localHash !== entry.localHash) {
+        const action = await handleDivergedRule(rule, false, false)
+
+        if (isCancel(action) || action === 'skip') {
+          skippedCount++
+          continue
+        }
+
+        if (action === 'detach') {
+          // Keep local file, mark as detached
+          updatedManifest.rules[rule] = createRuleEntry({
+            file: filename,
+            sourceHash: sourceHash,
+            localHash: localHash,
+            status: 'detached'
+          })
+          updatedManifest.rules[rule].detachedAt = new Date().toISOString()
+          log.info(`${filename} kept as detached`)
+          continue
+        }
+
+        // Overwrite
+      }
+    }
 
     try {
       await copyFile(sourcePath, targetPath)
@@ -156,5 +189,8 @@ export async function add(rules: string[], options: AddOptions = {}): Promise<vo
 
   if (addedCount > 0) {
     log.info(messages.addSuccess(addedCount))
+  }
+  if (skippedCount > 0) {
+    log.info(`${skippedCount} rule(s) skipped.`)
   }
 }

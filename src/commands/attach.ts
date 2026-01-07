@@ -7,7 +7,8 @@ import {
   fileExists,
   hashFile,
   copyFile,
-  getRuleFilename
+  getRuleFilename,
+  findRuleMatch
 } from '../lib/index.js'
 import { log, handleAttachDiffers, isCancel } from '../ui/index.js'
 import { messages } from '../ui/messages.js'
@@ -27,31 +28,33 @@ export async function attach(ruleName: string): Promise<void> {
     process.exit(1)
   }
 
-  const entry = manifest.rules[ruleName]
-  if (!entry) {
+  // Case-insensitive lookup
+  const match = findRuleMatch(ruleName, Object.keys(manifest.rules))
+  if (!match) {
     log.error(`Rule '${ruleName}' not found in manifest.`)
     process.exit(1)
   }
 
+  const entry = manifest.rules[match]
   if (entry.status !== 'detached') {
-    log.warn(messages.attachAlready(ruleName))
+    log.warn(messages.attachAlready(match))
     return
   }
 
   const claudeDir = getClaudeDir()
-  const filename = getRuleFilename(ruleName)
+  const filename = getRuleFilename(match)
   const localPath = join(claudeDir, filename)
   const sourcePath = join(config.source.path, filename)
 
   // Check if source exists
   if (!fileExists(sourcePath)) {
-    log.error(messages.errorMissingSource(ruleName))
+    log.error(messages.errorMissingSource(match))
     process.exit(1)
   }
 
   // Check if local exists
   if (!fileExists(localPath)) {
-    log.error(messages.errorMissingLocal(ruleName))
+    log.error(messages.errorMissingLocal(match))
     process.exit(1)
   }
 
@@ -61,18 +64,18 @@ export async function attach(ruleName: string): Promise<void> {
 
   if (localHash === sourceHash) {
     // Files match - just attach
-    await updateRuleInManifest(ruleName, {
+    await updateRuleInManifest(match, {
       status: 'synced',
       sourceHash,
       localHash,
       detachedAt: undefined
     })
-    log.success(messages.attachSuccess(ruleName))
+    log.success(messages.attachSuccess(match))
     return
   }
 
   // Files differ - ask user what to do
-  const action = await handleAttachDiffers(ruleName)
+  const action = await handleAttachDiffers(match)
 
   if (isCancel(action)) {
     log.info('Cancelled.')
@@ -83,23 +86,23 @@ export async function attach(ruleName: string): Promise<void> {
     case 'overwrite':
       await copyFile(sourcePath, localPath)
       const newHash = await hashFile(localPath)
-      await updateRuleInManifest(ruleName, {
+      await updateRuleInManifest(match, {
         status: 'synced',
         sourceHash,
         localHash: newHash,
         detachedAt: undefined
       })
-      log.success(messages.attachSuccess(ruleName))
+      log.success(messages.attachSuccess(match))
       break
 
     case 'keep':
-      await updateRuleInManifest(ruleName, {
+      await updateRuleInManifest(match, {
         status: 'diverged',
         sourceHash,
         localHash,
         detachedAt: undefined
       })
-      log.success(`${ruleName} attached (will show as diverged)`)
+      log.success(`${match} attached (will show as diverged)`)
       break
 
     case 'cancel':
