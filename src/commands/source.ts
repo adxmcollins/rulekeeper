@@ -138,3 +138,51 @@ export async function sourcePull(): Promise<void> {
     process.exit(1)
   }
 }
+
+import type { PullFrequency } from '../types/index.js'
+
+interface SourceConfigOptions {
+  autoPull?: boolean
+  frequency?: PullFrequency
+}
+
+export async function sourceConfig(options: SourceConfigOptions): Promise<void> {
+  const config = await loadConfig()
+  if (!config) {
+    log.error(messages.notConfigured)
+    process.exit(1)
+  }
+
+  // If no options provided, show current settings
+  if (options.autoPull === undefined && options.frequency === undefined) {
+    console.log('')
+    console.log(formatHeader('Pull Settings'))
+    console.log('')
+    console.log(`  Auto-pull:  ${config.settings.autoPull ? 'enabled' : 'disabled'}`)
+    console.log(`  Frequency:  ${config.settings.pullFrequency}`)
+    if (config.settings.lastPull) {
+      console.log(`  Last pull:  ${new Date(config.settings.lastPull).toLocaleString()}`)
+    }
+    console.log('')
+    console.log('  Use --auto-pull and --frequency to change settings.')
+    console.log('')
+    return
+  }
+
+  // Update settings
+  if (options.autoPull !== undefined) {
+    config.settings.autoPull = options.autoPull
+  }
+
+  if (options.frequency !== undefined) {
+    config.settings.pullFrequency = options.frequency
+  }
+
+  await saveConfig(config)
+
+  log.success('Settings updated.')
+  console.log('')
+  console.log(`  Auto-pull:  ${config.settings.autoPull ? 'enabled' : 'disabled'}`)
+  console.log(`  Frequency:  ${config.settings.pullFrequency}`)
+  console.log('')
+}

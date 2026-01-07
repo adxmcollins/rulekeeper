@@ -12,8 +12,10 @@ import {
   sourceShow,
   sourceSet,
   sourcePull,
+  sourceConfig,
   doctor
 } from './commands/index.js'
+import type { PullFrequency } from './types/index.js'
 
 const program = new Command()
 
@@ -120,6 +122,39 @@ sourceCmd
   .description('Manually pull from git remote')
   .action(async () => {
     await sourcePull()
+  })
+
+sourceCmd
+  .command('config')
+  .description('View or update pull settings')
+  .option('--auto-pull <boolean>', 'Enable or disable auto-pull (on/off)')
+  .option('--frequency <freq>', 'Set pull frequency (always, daily, weekly)')
+  .action(async (options) => {
+    let autoPull: boolean | undefined
+    if (options.autoPull !== undefined) {
+      const val = options.autoPull.toLowerCase()
+      if (val === 'on' || val === 'true' || val === '1') {
+        autoPull = true
+      } else if (val === 'off' || val === 'false' || val === '0') {
+        autoPull = false
+      } else {
+        console.error('Invalid value for --auto-pull. Use: on, off, true, false')
+        process.exit(1)
+      }
+    }
+
+    let frequency: PullFrequency | undefined
+    if (options.frequency !== undefined) {
+      const val = options.frequency.toLowerCase()
+      if (val === 'always' || val === 'daily' || val === 'weekly') {
+        frequency = val as PullFrequency
+      } else {
+        console.error('Invalid value for --frequency. Use: always, daily, weekly')
+        process.exit(1)
+      }
+    }
+
+    await sourceConfig({ autoPull, frequency })
   })
 
 program
