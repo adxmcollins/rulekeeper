@@ -1,3 +1,4 @@
+import { createRequire } from 'module'
 import { Command } from 'commander'
 import {
   init,
@@ -17,12 +18,15 @@ import {
 } from './commands/index.js'
 import type { PullFrequency } from './types/index.js'
 
+const require = createRequire(import.meta.url)
+const packageJson = require('../package.json')
+
 const program = new Command()
 
 program
   .name('rulekeeper')
   .description('Sync and manage Claude Code rules across projects')
-  .version('0.1.0')
+  .version(packageJson.version)
 
 program
   .command('init')
