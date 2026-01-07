@@ -357,6 +357,12 @@ RuleKeeper works on:
 
 On Windows, RuleKeeper auto-detects your shell environment for optimal path handling.
 
+> **PowerShell Users:** Windows security policy blocks npm global package scripts by default. Run this once to enable:
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+> This affects all npm global packages, not just RuleKeeper. CMD and Git Bash work without this step.
+
 ## Source Repository Structure
 
 Your rules source should contain `.md` files at the root level:
