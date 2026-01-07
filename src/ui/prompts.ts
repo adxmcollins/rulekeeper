@@ -43,7 +43,7 @@ export async function inputSourcePath(): Promise<string | symbol> {
 export async function inputGitUrl(): Promise<string | symbol> {
   return await p.text({
     message: 'Enter the Git repository URL:',
-    placeholder: 'git@github.com:username/claude-rules.git',
+    placeholder: 'https://github.com/adxmcollins/rulekeeper-rules.git',
     validate: (value) => {
       if (!value) return 'URL is required'
       return undefined

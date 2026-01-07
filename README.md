@@ -103,6 +103,8 @@ rk init           # Start interactive setup
 rk init --force   # Overwrite existing configuration
 ```
 
+> **Tip:** Want to try RuleKeeper before setting up your own rules? Use our example repository: `https://github.com/adxmcollins/rulekeeper-rules.git`
+
 **Options:**
 
 | Option | Description |
