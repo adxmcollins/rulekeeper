@@ -5,7 +5,8 @@ import {
   saveManifest,
   getClaudeDir,
   deleteFile,
-  getRuleFilename
+  getRuleFilename,
+  findRuleMatch
 } from '../lib/index.js'
 import { log } from '../ui/index.js'
 import { messages } from '../ui/messages.js'
@@ -35,15 +36,18 @@ export async function remove(rules: string[], options: RemoveOptions = {}): Prom
   }
 
   const claudeDir = getClaudeDir()
+  const manifestRules = Object.keys(manifest.rules)
   let removedCount = 0
 
   for (const rule of rules) {
-    if (!manifest.rules[rule]) {
+    // Case-insensitive lookup
+    const match = findRuleMatch(rule, manifestRules)
+    if (!match) {
       log.warn(messages.removeNotInstalled(rule))
       continue
     }
 
-    const filename = getRuleFilename(rule)
+    const filename = getRuleFilename(match)
     const targetPath = join(claudeDir, filename)
 
     // Delete file unless --keep-file is specified
@@ -56,8 +60,8 @@ export async function remove(rules: string[], options: RemoveOptions = {}): Prom
     }
 
     // Remove from manifest
-    delete manifest.rules[rule]
-    log.success(`Removed ${rule}`)
+    delete manifest.rules[match]
+    log.success(`Removed ${match}`)
     removedCount++
   }
 

@@ -6,7 +6,8 @@ import {
   fileExists,
   readTextFile,
   hashFile,
-  getRuleFilename
+  getRuleFilename,
+  findRuleMatch
 } from '../lib/index.js'
 import {
   log,
@@ -65,7 +66,17 @@ export async function diff(rules: string[], options: DiffOptions = {}): Promise<
       return
     }
   } else if (rules.length > 0) {
-    rulesToDiff = rules
+    // Case-insensitive lookup
+    const manifestRules = Object.keys(manifest.rules)
+    rulesToDiff = []
+    for (const rule of rules) {
+      const match = findRuleMatch(rule, manifestRules)
+      if (match) {
+        rulesToDiff.push(match)
+      } else {
+        log.warn(`Rule '${rule}' not found in manifest`)
+      }
+    }
   } else {
     log.error('Specify a rule name or use --all to see all diverged rules.')
     process.exit(1)
@@ -73,10 +84,7 @@ export async function diff(rules: string[], options: DiffOptions = {}): Promise<
 
   for (const ruleName of rulesToDiff) {
     const entry = manifest.rules[ruleName]
-    if (!entry) {
-      log.warn(`Rule '${ruleName}' not found in manifest`)
-      continue
-    }
+    if (!entry) continue
 
     const filename = getRuleFilename(ruleName)
     const localPath = join(claudeDir, filename)

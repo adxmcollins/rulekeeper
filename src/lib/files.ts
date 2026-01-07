@@ -61,6 +61,33 @@ export function getRuleName(filename: string): string {
 }
 
 export function getRuleFilename(ruleName: string): string {
-  // Add .md extension if not present
-  return ruleName.endsWith('.md') ? ruleName : `${ruleName}.md`
+  // Remove .md extension if already present, then add it back
+  // This handles both "laravel" and "laravel.md" inputs
+  const baseName = ruleName.toLowerCase().endsWith('.md')
+    ? ruleName.slice(0, -3)
+    : ruleName
+  return `${baseName}.md`
+}
+
+export function normalizeRuleName(ruleName: string): string {
+  // Normalize rule name: remove .md extension and lowercase
+  const name = ruleName.toLowerCase().endsWith('.md')
+    ? ruleName.slice(0, -3)
+    : ruleName
+  return name.toLowerCase()
+}
+
+export function findRuleMatch(
+  input: string,
+  availableRules: string[]
+): string | null {
+  // Find a rule case-insensitively
+  const normalizedInput = normalizeRuleName(input)
+
+  // First try exact match (case-insensitive)
+  const match = availableRules.find(
+    rule => normalizeRuleName(rule) === normalizedInput
+  )
+
+  return match ?? null
 }

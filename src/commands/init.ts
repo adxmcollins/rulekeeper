@@ -53,62 +53,67 @@ export async function init(options: InitOptions = {}): Promise<void> {
   let detectedSourceType: SourceType = sourceType as SourceType
 
   if (sourceType === 'git') {
-    // Get git URL
-    const gitUrl = await inputGitUrl()
-    if (isCancel(gitUrl)) {
-      log.info('Setup cancelled.')
-      return
-    }
+    // Git clone flow with retry
+    while (true) {
+      const gitUrl = await inputGitUrl()
+      if (isCancel(gitUrl)) {
+        log.info('Setup cancelled.')
+        return
+      }
 
-    // Get clone path
-    const clonePath = await inputClonePath()
-    if (isCancel(clonePath)) {
-      log.info('Setup cancelled.')
-      return
-    }
+      const clonePath = await inputClonePath()
+      if (isCancel(clonePath)) {
+        log.info('Setup cancelled.')
+        return
+      }
 
-    const expandedClonePath = expandTilde(clonePath as string)
+      const expandedClonePath = expandTilde(clonePath as string)
 
-    // Clone the repository
-    const s = spinner()
-    s.start('Cloning repository...')
+      const s = spinner()
+      s.start('Cloning repository...')
 
-    try {
-      ensureDir(join(expandedClonePath, '..'))
-      await cloneRepo(gitUrl as string, expandedClonePath)
-      s.stop('Repository cloned successfully.')
-      sourcePath = expandedClonePath
-      remote = gitUrl as string
-    } catch (error) {
-      s.stop('Failed to clone repository.')
-      log.error(error instanceof Error ? error.message : String(error))
-      return
+      try {
+        ensureDir(join(expandedClonePath, '..'))
+        await cloneRepo(gitUrl as string, expandedClonePath)
+        s.stop('Repository cloned successfully.')
+        sourcePath = expandedClonePath
+        remote = gitUrl as string
+        break
+      } catch (error) {
+        s.stop('Failed to clone repository.')
+        log.error(error instanceof Error ? error.message : String(error))
+        log.info('Please try again.')
+      }
     }
   } else {
-    // Get local path
-    const localPath = await inputSourcePath()
-    if (isCancel(localPath)) {
-      log.info('Setup cancelled.')
-      return
-    }
-
-    const expandedPath = expandTilde(localPath as string)
-
-    if (!fileExists(expandedPath)) {
-      log.error(messages.sourceNotFound(expandedPath))
-      return
-    }
-
-    sourcePath = expandedPath
-
-    // Auto-detect if it's a git repo with a remote
-    if (isGitRepo(expandedPath)) {
-      const detectedRemote = await getRemoteUrl(expandedPath)
-      if (detectedRemote) {
-        detectedSourceType = 'git'
-        remote = detectedRemote
-        log.info(`Detected git repository with remote: ${detectedRemote}`)
+    // Local path flow with retry
+    while (true) {
+      const localPath = await inputSourcePath()
+      if (isCancel(localPath)) {
+        log.info('Setup cancelled.')
+        return
       }
+
+      const expandedPath = expandTilde(localPath as string)
+
+      if (!fileExists(expandedPath)) {
+        log.error(messages.sourceNotFound(expandedPath))
+        log.info('Please try again.')
+        continue
+      }
+
+      sourcePath = expandedPath
+
+      // Auto-detect if it's a git repo with a remote
+      if (isGitRepo(expandedPath)) {
+        const detectedRemote = await getRemoteUrl(expandedPath)
+        if (detectedRemote) {
+          detectedSourceType = 'git'
+          remote = detectedRemote
+          log.info(`Detected git repository with remote: ${detectedRemote}`)
+        }
+      }
+      break
     }
   }
 
