@@ -110,8 +110,8 @@ rk init --force   # Overwrite existing configuration
 | `-f, --force` | Overwrite existing configuration |
 
 **Source Types:**
-- **Local folder** — Path to a folder containing `.md` rule files (auto-detects if it's a git repo with remote)
-- **Git repository** — Clone a repository containing your rules
+- **Local folder** - Path to a folder containing `.md` rule files (auto-detects if it's a git repo with remote)
+- **Git repository** - Clone a repository containing your rules
 
 ---
 
@@ -338,9 +338,9 @@ rk doctor
 
 When adding rules to a project that already has a `.claude` directory with existing files:
 
-1. **New rules** — Files that don't exist locally are copied from source
-2. **Existing untracked files** — You're prompted to: overwrite, skip, or detach
-3. **Existing tracked files** — Updated if unchanged locally, prompted if diverged
+1. **New rules** - Files that don't exist locally are copied from source
+2. **Existing untracked files** - You're prompted to: overwrite, skip, or detach
+3. **Existing tracked files** - Updated if unchanged locally, prompted if diverged
 
 This allows you to:
 - Adopt RuleKeeper in projects with existing Claude configurations
@@ -449,16 +449,16 @@ rk source pull
 
 ## When to Use RuleKeeper
 
-First, check Claude Code's [official memory features](https://code.claude.com/docs/en/memory) — they may be all you need.
+First, check Claude Code's [official memory features](https://code.claude.com/docs/en/memory) - they may be all you need.
 
 RuleKeeper fills gaps not covered by official solutions:
 
-- **Multiple projects, same rules** — Manage once, distribute everywhere
-- **Multiple machines** — Source of truth in a git repo syncs across machines
-- **Small teams** — Share standards without enterprise infrastructure
-- **Claude Code web** — Rules must be real files (symlinks don't work)
-- **Divergence tracking** — Know when local rules have drifted
-- **Intentional variations** — Track that a project has deliberately different rules
+- **Multiple projects, same rules** - Manage once, distribute everywhere
+- **Multiple machines** - Source of truth in a git repo syncs across machines
+- **Small teams** - Share standards without enterprise infrastructure
+- **Claude Code web** - Rules must be real files (symlinks don't work)
+- **Divergence tracking** - Know when local rules have drifted
+- **Intentional variations** - Track that a project has deliberately different rules
 
 ## License
 
