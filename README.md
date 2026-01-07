@@ -6,7 +6,7 @@ A cross-platform CLI tool for syncing and managing [Claude Code](https://docs.an
 
 ## Overview
 
-RuleKeeper helps teams maintain consistent Claude Code configurations by:
+RuleKeeper helps teams and multi-project users maintain consistent Claude Code configurations by:
 
 - Syncing `.claude/` directory files from a central source (local folder or git repository)
 - Tracking rule states: synced, outdated, diverged, or detached
