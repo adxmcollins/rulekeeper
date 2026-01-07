@@ -23,8 +23,8 @@ export async function selectSourceType(): Promise<SourceType | symbol> {
   return await p.select({
     message: 'Where are your Claude rules stored?',
     options: [
-      { value: 'local', label: 'Local folder', hint: 'e.g., ~/Documents/claude-rules' },
-      { value: 'git', label: 'Git repository', hint: 'Will be cloned locally' }
+      { value: 'local', label: 'Local folder', hint: 'Already cloned git repo or static folder' },
+      { value: 'git', label: 'Git repository', hint: 'Clone now from URL' }
     ]
   }) as SourceType | symbol
 }
