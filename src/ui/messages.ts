@@ -5,7 +5,7 @@ export const messages = {
   // General
   notConfigured: `RuleKeeper is not configured. Run ${formatCommand('rk init')} first.`,
   noManifest: `No RuleKeeper manifest found. Run ${formatCommand('rk add')} first.`,
-  noClaudeDir: `No .claude/ directory found. Are you in a project root?`,
+  noClaudeDir: `No .claude/rules/ directory found. Are you in a project root?`,
 
   // Init
   initWelcome: 'Welcome to RuleKeeper!',
@@ -20,7 +20,7 @@ export const messages = {
   // Add
   addSuccess: (count: number) => `Added ${count} rule${count !== 1 ? 's' : ''}.`,
   addConflict: (files: string[]) =>
-    `The following files already exist in .claude/:\n${files.map(f => `  - ${f}`).join('\n')}`,
+    `The following files already exist in .claude/rules/:\n${files.map(f => `  - ${f}`).join('\n')}`,
   addNoRules: 'No rules specified. Use --all to add all available rules.',
   ruleNotFound: (name: string) => `Rule '${name}' not found in source.`,
 

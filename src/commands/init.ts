@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import pc from 'picocolors'
 import {
   loadConfig,
   saveConfig,
@@ -154,4 +155,12 @@ export async function init(options: InitOptions = {}): Promise<void> {
   await saveConfig(config)
 
   outro(messages.initSuccess)
+
+  // Show next steps
+  log.info('')
+  log.info('Next steps:')
+  log.info(`  • Navigate to a project: ${pc.dim('cd my-project')}`)
+  log.info(`  • Add all rules:         ${pc.cyan('rk add -a')}`)
+  log.info(`  • Or add specific rule:  ${pc.cyan('rk add <rule-name>')}`)
+  log.info(`  • List available rules:  ${pc.cyan('rk list')}`)
 }

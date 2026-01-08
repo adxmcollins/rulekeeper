@@ -28,14 +28,14 @@ describe('paths', () => {
   })
 
   describe('getClaudeDir', () => {
-    it('should return path ending with .claude', () => {
+    it('should return path ending with .claude/rules', () => {
       const dir = getClaudeDir()
-      expect(dir.endsWith('.claude')).toBe(true)
+      expect(dir.endsWith(join('.claude', 'rules'))).toBe(true)
     })
 
     it('should use custom project path', () => {
       const dir = getClaudeDir('/custom/path')
-      expect(dir).toBe(join('/custom/path', '.claude'))
+      expect(dir).toBe(join('/custom/path', '.claude', 'rules'))
     })
   })
 
