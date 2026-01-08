@@ -11,7 +11,8 @@ import {
   updateConfigLastPull,
   getRuleFilename,
   deleteFile,
-  findRuleMatch
+  findRuleMatch,
+  isIgnoredRule
 } from '../lib/index.js'
 import {
   log,
@@ -87,6 +88,11 @@ export async function pull(rules: string[], options: PullOptions = {}): Promise<
   const isSingleRule = rules.length === 1
 
   for (const ruleName of rulesToProcess) {
+    // Skip ignored files like README.md
+    if (isIgnoredRule(ruleName)) {
+      continue
+    }
+
     const entry = manifest.rules[ruleName]
 
     if (!entry) {

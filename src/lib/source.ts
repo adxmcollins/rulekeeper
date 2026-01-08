@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { fileExists, listFiles, getRuleFilename, getRuleName } from './files.js'
+import { fileExists, listFiles, getRuleFilename, getRuleName, IGNORED_FILES } from './files.js'
 import { hashFile } from './hash.js'
 import type { GlobalConfig } from '../types/index.js'
 
@@ -8,9 +8,6 @@ export interface AvailableRule {
   file: string
   path: string
 }
-
-// Files to ignore when listing available rules (case-insensitive)
-const IGNORED_FILES = ['readme.md']
 
 export async function getAvailableRules(config: GlobalConfig): Promise<AvailableRule[]> {
   const sourcePath = config.source.path

@@ -2,6 +2,14 @@ import { existsSync, mkdirSync } from 'node:fs'
 import { readFile, writeFile, copyFile as fsCopyFile, readdir, unlink, rm } from 'node:fs/promises'
 import { dirname, join, basename } from 'node:path'
 
+// Files to ignore when listing/processing rules (case-insensitive)
+export const IGNORED_FILES = ['readme.md']
+
+export function isIgnoredRule(ruleName: string): boolean {
+  const filename = getRuleFilename(ruleName)
+  return IGNORED_FILES.includes(filename.toLowerCase())
+}
+
 export function ensureDir(dirPath: string): void {
   if (!existsSync(dirPath)) {
     mkdirSync(dirPath, { recursive: true })
