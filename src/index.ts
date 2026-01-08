@@ -1,5 +1,6 @@
 import { createRequire } from 'module'
 import { Command } from 'commander'
+import updateNotifier from 'update-notifier'
 import {
   init,
   add,
@@ -20,6 +21,9 @@ import type { PullFrequency } from './types/index.js'
 
 const require = createRequire(import.meta.url)
 const packageJson = require('../package.json')
+
+// Check for updates (runs in background, shows message at exit if update available)
+updateNotifier({ pkg: packageJson }).notify({ isGlobal: true })
 
 const program = new Command()
 
