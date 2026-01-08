@@ -13,7 +13,7 @@ export function getConfigPath(): string {
 }
 
 export function getClaudeDir(projectPath: string = process.cwd()): string {
-  return join(projectPath, '.claude')
+  return join(projectPath, '.claude', 'rules')
 }
 
 export function getRulekeeperDir(projectPath: string = process.cwd()): string {

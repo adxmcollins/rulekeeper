@@ -8,7 +8,7 @@ A cross-platform CLI tool for syncing and managing [Claude Code](https://docs.an
 
 RuleKeeper helps teams and multi-project users maintain consistent Claude Code configurations by:
 
-- Syncing `.claude/` directory files from a central source (local folder or git repository)
+- Syncing `.claude/rules/` directory files from a central source (local folder or git repository)
 - Tracking rule states: synced, outdated, diverged, or detached
 - Supporting selective rule installation per project
 - Handling conflicts when local changes exist
@@ -135,7 +135,7 @@ rk add -a                 # Add all available rules
 | `-a, --all` | Add all available rules from source |
 
 **Behavior:**
-- Creates `.claude/` directory if it doesn't exist
+- Creates `.claude/rules/` directory if it doesn't exist
 - Rule names are case-insensitive (`Coding-Style` matches `coding-style.md`)
 - Prompts for confirmation if a file already exists with local changes
 - Options when conflict detected: overwrite, skip, or detach
@@ -336,9 +336,9 @@ rk doctor
 | `diverged` | Local changes exist that differ from source | Prompted to overwrite or detach |
 | `detached` | Intentionally diverged, excluded from updates | Ignored by `rk pull` unless `--include-detached` |
 
-## Handling Existing `.claude` Directories
+## Handling Existing `.claude/rules` Directories
 
-When adding rules to a project that already has a `.claude` directory with existing files:
+When adding rules to a project that already has a `.claude/rules` directory with existing files:
 
 1. **New rules** - Files that don't exist locally are copied from source
 2. **Existing untracked files** - You're prompted to: overwrite, skip, or detach
