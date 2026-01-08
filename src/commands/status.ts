@@ -7,7 +7,8 @@ import {
   hashFile,
   pullSourceIfNeeded,
   updateConfigLastPull,
-  getRuleFilename
+  getRuleFilename,
+  isIgnoredRule
 } from '../lib/index.js'
 import { log, spinner, formatRuleLine, formatHeader } from '../ui/index.js'
 import { messages } from '../ui/messages.js'
@@ -55,6 +56,11 @@ export async function status(): Promise<void> {
   let needsAttention = 0
 
   for (const ruleName of ruleNames.sort()) {
+    // Skip ignored files like README.md
+    if (isIgnoredRule(ruleName)) {
+      continue
+    }
+
     const entry = manifest.rules[ruleName]
     const filename = getRuleFilename(ruleName)
     const localPath = join(claudeDir, filename)
