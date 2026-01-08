@@ -22,8 +22,17 @@ import type { PullFrequency } from './types/index.js'
 const require = createRequire(import.meta.url)
 const packageJson = require('../package.json')
 
-// Check for updates (runs in background, shows message at exit if update available)
-updateNotifier({ pkg: packageJson }).notify({ isGlobal: true })
+// Check for updates synchronously (cached for 24h)
+// Wrapped in try/catch to fail silently on network errors
+;(async () => {
+  try {
+    const notifier = updateNotifier({ pkg: packageJson })
+    await notifier.fetchInfo()
+    notifier.notify({ isGlobal: true })
+  } catch {
+    // Silently ignore update check failures
+  }
+})()
 
 const program = new Command()
 
